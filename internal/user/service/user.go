@@ -2,9 +2,9 @@ package service
 
 import (
 	"car.rental/consts"
+	"car.rental/dao"
 	_struct2 "car.rental/internal/user/struct"
 	"car.rental/middlewares"
-	"car.rental/model"
 	"errors"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -28,14 +28,14 @@ func (u *User) Register(c *gin.Context) error {
 		err = errors.New(consts.ErrInvalidParameter)
 		return err
 	}
-	userInfo, err := model.GetUserByMobile(registerForm.Mobile)
+	userInfo, err := dao.GetUserByMobile(registerForm.Mobile)
 
 	if err != nil {
 		err = errors.New(consts.UserExist)
 		return err
 	}
 
-	if err = model.CreateUser(userInfo); err != nil {
+	if err = dao.CreateUser(userInfo); err != nil {
 		err = errors.New("注册失败")
 		return err
 	}
@@ -53,7 +53,7 @@ func (user *User) Login(c *gin.Context) (token string, err error) {
 		err = errors.New(consts.ErrInvalidParameter)
 		return
 	}
-	userInfo, err := model.GetUserByMobile(loginForm.Mobile)
+	userInfo, err := dao.GetUserByMobile(loginForm.Mobile)
 
 	if err != nil {
 		err = errors.New(consts.UserExist)

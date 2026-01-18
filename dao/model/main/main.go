@@ -1,9 +1,9 @@
 package main
 
 import (
+	"car.rental/dao/model"
 	"car.rental/global"
 	Init "car.rental/init"
-	"car.rental/model"
 )
 
 func main() {

@@ -8,11 +8,15 @@ import (
 )
 
 func GetUserByMobile(mobile string) (user *model.User, err error) {
-	result := global.DB.Where("mobile = ?", mobile).Find(user)
+	var u model.User
+	result := global.DB.Where("mobile = ?", mobile).First(&u)
 	if result.RowsAffected == 0 {
 		return nil, errors.New(consts.UserNotFound)
 	}
-	return user, nil
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &u, nil
 }
 
 func CreateUser(user *model.User) (err error) {

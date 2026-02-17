@@ -1,10 +1,12 @@
 package router
 
 import (
-	api2 "car.rental/internal/user/api"
 	"fmt"
 	"net/http"
 	"time"
+
+	api2 "car.rental/internal/api"
+
 	// adminrouter "go-router/internal/app/admin/router
 	"github.com/gin-gonic/gin"
 )
@@ -22,10 +24,10 @@ func NewHTTPRouter() *gin.Engine {
 		})
 	})
 	// router group.
-	app := engine.Group("/car_rental")
+	car := engine.Group("/car_rental/v1")
 	{
-		app.POST("/login", api2.Login)
-		app.POST("/register", api2.Register)
+		car.POST("/login", api2.Login)
+		car.POST("/send_sms", api2.SendSMS)
 	}
 	return engine
 }

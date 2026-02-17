@@ -1,9 +1,10 @@
 package dao
 
 import (
+	"errors"
+
 	"car.rental/dao/model"
 	"car.rental/global"
-	"errors"
 )
 
 // CreateCar 创建汽车信息
@@ -16,28 +17,25 @@ func CreateCar(car *model.Car) (err error) {
 }
 
 // ListCars 按条件筛选车辆列表
-func ListCars(brand, modelName string, status *int8, minPrice, maxPrice *float64) (cars []*model.Car, err error) {
+func ListCars(status *int8) (cars []*model.Car, err error) {
 	db := global.DB.Model(&model.Car{})
-	if brand != "" {
-		db = db.Where("brand = ?", brand)
-	}
-	if modelName != "" {
-		db = db.Where("model = ?", modelName)
-	}
 	if status != nil {
 		db = db.Where("status = ?", *status)
-	}
-	if minPrice != nil {
-		db = db.Where("daily_rent >= ?", *minPrice)
-	}
-	if maxPrice != nil {
-		db = db.Where("daily_rent <= ?", *maxPrice)
 	}
 	result := db.Find(&cars)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return cars, nil
+}
+
+func CountCarsByStatus(status int8) (int64, error) {
+	var count int64
+	result := global.DB.Model(&model.Car{}).Where("status = ?", status).Count(&count)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return count, nil
 }
 
 // GetCarByID 根据汽车ID获取汽车信息

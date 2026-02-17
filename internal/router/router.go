@@ -5,9 +5,9 @@ import (
 	"net/http"
 	"time"
 
-	api2 "car.rental/internal/api"
-
-	// adminrouter "go-router/internal/app/admin/router
+	carHandler "car.rental/internal/api/car"
+	userHandler "car.rental/internal/api/user"
+	"car.rental/middlewares"
 	"github.com/gin-gonic/gin"
 )
 
@@ -26,14 +26,15 @@ func NewHTTPRouter() *gin.Engine {
 	// router group.
 	auth := engine.Group("/car_rental/v1/auth")
 	{
-		auth.POST("/login", api2.Login)
-		auth.POST("/send_sms", api2.SendSMS)
+		auth.POST("/login", userHandler.Login)
+		auth.POST("/send_sms", userHandler.SendSMS)
 	}
 	api := engine.Group("/car_rental/v1")
+	api.Use(middlewares.JWTAuth())
 	{
-		api.GET("/cars", api2.ListCars)
-		api.GET("/cars/:id", api2.GetCar)
-		api.PUT("/cars/:id", api2.UpdateCar)
+		api.GET("/cars", carHandler.GetListCars)
+		api.GET("/cars/:id", carHandler.GetCarDetail)
+		api.PUT("/cars/:id", carHandler.UpdateCarInfo)
 	}
 	return engine
 }

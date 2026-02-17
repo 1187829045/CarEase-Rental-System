@@ -7,8 +7,6 @@ type Car struct {
 	Model        string  `gorm:"column:model;type:varchar(30);not null"`                      // 型号
 	Color        string  `gorm:"column:color;type:varchar(10);not null"`                      // 颜色
 	LicensePlate string  `gorm:"column:license_plate;type:varchar(15);unique;not null;index"` // 车牌号
-	Seats        int8    `gorm:"column:seats;not null"`                                       // 座位数
-	FuelType     string  `gorm:"column:fuel_type;type:varchar(10);not null"`                  // 燃料类型
 	Displacement float64 `gorm:"column:displacement;type:decimal(3,1)"`                       // 排量
 	DriveType    string  `gorm:"column:drive_type;type:varchar(10)"`                          // 驱动方式
 	Status       int8    `gorm:"column:status;default:0;comment '0:可用, 1:不可用, 2:已出租'"`        // 车辆状态 可用，维修，已租出

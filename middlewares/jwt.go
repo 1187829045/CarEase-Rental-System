@@ -2,11 +2,12 @@ package middlewares
 
 import (
 	"errors"
+	"net/http"
+	"time"
+
+	"car.rental/consts"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
-	"net/http"
-
-	"time"
 )
 
 type CustomClaims struct {
@@ -57,7 +58,33 @@ func JWTAuth() gin.HandlerFunc {
 		// 将解析出的声明信息存储到上下文中
 		c.Set("claims", claims)
 		c.Set("userId", claims.ID)
+		c.Set("authorityId", claims.AuthorityId)
+
 		c.Next() // 继续处理请求
+	}
+}
+
+func AdminOnly() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		claimsValue, ok := c.Get("claims")
+		if !ok {
+			c.JSON(http.StatusUnauthorized, gin.H{
+				"code": http.StatusUnauthorized,
+				"msg":  consts.ErrNoLogin,
+			})
+			c.Abort()
+			return
+		}
+		claims, ok := claimsValue.(*CustomClaims)
+		if !ok || claims.AuthorityId != consts.AdminRoleID {
+			c.JSON(http.StatusForbidden, gin.H{
+				"code": http.StatusForbidden,
+				"msg":  "无权限",
+			})
+			c.Abort()
+			return
+		}
+		c.Next()
 	}
 }
 

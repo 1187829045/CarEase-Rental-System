@@ -12,4 +12,5 @@ type User struct {
 	UserName string     `gorm:"column:user_name;type:varchar(20)"`
 	Birthday *time.Time `gorm:"column:birthday;type:datetime"`
 	Gender   int8       `gorm:"column:gender;default:male;type:varchar(6) comment '0表示女, 1表示男'"`
+	Role     int8       `gorm:"column:role;default:0"`
 }

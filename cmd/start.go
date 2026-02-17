@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"syscall"
 	"time"
 )
@@ -55,7 +56,9 @@ func shutdown(httpSrv *http.Server) {
 		}
 		fmt.Printf("%s|||%s \r\n", logger.HTTPPort, "http shutdown...")
 	}
-	// 设置一个关机信号,程序执行时,如果值存在,则表示即将关机
-	// td: 待完成
+	shutdownFlagPath := filepath.Join(os.TempDir(), "car_center_shutdown")
+	if err := os.WriteFile(shutdownFlagPath, []byte(time.Now().Format(time.RFC3339)), 0644); err != nil {
+		fmt.Printf("%s|||%s \r\n", logger.HTTPPort, fmt.Sprintf("关机信号文件写入失败,err::%v", err))
+	}
 	time.Sleep(3 * time.Second)
 }

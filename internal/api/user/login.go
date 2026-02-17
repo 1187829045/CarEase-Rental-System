@@ -47,8 +47,9 @@ func Login(c *gin.Context) {
 	}
 	j := middlewares.NewJWT()
 	claims := middlewares.CustomClaims{
-		ID:       userInfo.UserId,
-		NickName: userInfo.UserName,
+		ID:          userInfo.UserId,
+		NickName:    userInfo.UserName,
+		AuthorityId: uint(userInfo.Role),
 		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Unix(),
 			ExpiresAt: time.Now().Unix() + 60*60*24*30,

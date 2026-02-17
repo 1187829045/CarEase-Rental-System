@@ -24,10 +24,16 @@ func NewHTTPRouter() *gin.Engine {
 		})
 	})
 	// router group.
-	car := engine.Group("/car_rental/v1")
+	auth := engine.Group("/car_rental/v1/auth")
 	{
-		car.POST("/login", api2.Login)
-		car.POST("/send_sms", api2.SendSMS)
+		auth.POST("/login", api2.Login)
+		auth.POST("/send_sms", api2.SendSMS)
+	}
+	api := engine.Group("/car_rental/v1")
+	{
+		api.GET("/cars", api2.ListCars)
+		api.GET("/cars/:id", api2.GetCar)
+		api.PUT("/cars/:id", api2.UpdateCar)
 	}
 	return engine
 }

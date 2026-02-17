@@ -11,7 +11,7 @@ type Car struct {
 	FuelType     string  `gorm:"column:fuel_type;type:varchar(10);not null"`                  // 燃料类型
 	Displacement float64 `gorm:"column:displacement;type:decimal(3,1)"`                       // 排量
 	DriveType    string  `gorm:"column:drive_type;type:varchar(10)"`                          // 驱动方式
-	Status       int8    `gorm:"column:status;default:0;comment '0:可用, 1:不可用, 2:已出租'"`        // 车辆状态
+	Status       int8    `gorm:"column:status;default:0;comment '0:可用, 1:不可用, 2:已出租'"`        // 车辆状态 可用，维修，已租出
 	DailyRent    float64 `gorm:"column:daily_rent;type:decimal(10,2);not null"`               // 日租金
 	Mileage      int64   `gorm:"column:mileage;default:0"`                                    // 里程数
 	Description  string  `gorm:"column:description;type:text"`                                // 车辆描述

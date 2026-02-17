@@ -15,6 +15,31 @@ func CreateCar(car *model.Car) (err error) {
 	return nil
 }
 
+// ListCars 按条件筛选车辆列表
+func ListCars(brand, modelName string, status *int8, minPrice, maxPrice *float64) (cars []*model.Car, err error) {
+	db := global.DB.Model(&model.Car{})
+	if brand != "" {
+		db = db.Where("brand = ?", brand)
+	}
+	if modelName != "" {
+		db = db.Where("model = ?", modelName)
+	}
+	if status != nil {
+		db = db.Where("status = ?", *status)
+	}
+	if minPrice != nil {
+		db = db.Where("daily_rent >= ?", *minPrice)
+	}
+	if maxPrice != nil {
+		db = db.Where("daily_rent <= ?", *maxPrice)
+	}
+	result := db.Find(&cars)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return cars, nil
+}
+
 // GetCarByID 根据汽车ID获取汽车信息
 func GetCarByID(carID uint) (car *model.Car, err error) {
 	result := global.DB.Where("car_id = ?", carID).First(&car)

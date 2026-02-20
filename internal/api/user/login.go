@@ -13,7 +13,6 @@ import (
 )
 
 func Login(c *gin.Context) {
-
 	loginForm := _struct.PassWordLoginForm{}
 	if err := c.ShouldBind(&loginForm); err != nil {
 		c.JSON(400, gin.H{

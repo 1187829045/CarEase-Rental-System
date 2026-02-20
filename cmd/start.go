@@ -46,16 +46,14 @@ func init() {
 func shutdown(httpSrv *http.Server) {
 	sigs := make(chan os.Signal, 1)
 	signal.Notify(sigs, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
-	select {
-	case sig := <-sigs:
-		fmt.Printf("%s|||%s \r\n", logger.HTTPPort, fmt.Sprintf("捕获信号signal.Notify,sigs:%v", sig))
-		ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) // 3s没有处理完，则强制关闭
-		defer cancel()
-		if err := httpSrv.Shutdown(ctx); err != nil {
-			fmt.Printf("%s|||%s \r\n", logger.HTTPPort, fmt.Sprintf("捕获信号signal.shutdown,err::%v", err))
-		}
-		fmt.Printf("%s|||%s \r\n", logger.HTTPPort, "http shutdown...")
+	sig := <-sigs
+	fmt.Printf("%s|||%s \r\n", logger.HTTPPort, fmt.Sprintf("捕获信号signal.Notify,sigs:%v", sig))
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second) // 3s没有处理完，则强制关闭
+	defer cancel()
+	if err := httpSrv.Shutdown(ctx); err != nil {
+		fmt.Printf("%s|||%s \r\n", logger.HTTPPort, fmt.Sprintf("捕获信号signal.shutdown,err::%v", err))
 	}
+	fmt.Printf("%s|||%s \r\n", logger.HTTPPort, "http shutdown...")
 	shutdownFlagPath := filepath.Join(os.TempDir(), "car_center_shutdown")
 	if err := os.WriteFile(shutdownFlagPath, []byte(time.Now().Format(time.RFC3339)), 0644); err != nil {
 		fmt.Printf("%s|||%s \r\n", logger.HTTPPort, fmt.Sprintf("关机信号文件写入失败,err::%v", err))

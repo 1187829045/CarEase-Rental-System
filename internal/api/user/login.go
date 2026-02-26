@@ -7,6 +7,7 @@ import (
 	"car.rental/dao"
 	"car.rental/dao/model"
 	"car.rental/middlewares"
+	"car.rental/pkg/response"
 	_struct "car.rental/struct"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
@@ -15,10 +16,7 @@ import (
 func Login(c *gin.Context) {
 	loginForm := _struct.PassWordLoginForm{}
 	if err := c.ShouldBind(&loginForm); err != nil {
-		c.JSON(400, gin.H{
-			"code": 400,
-			"msg":  consts.ErrInvalidParameter,
-		})
+		response.BadRequest(c, consts.ErrInvalidParameter)
 		return
 	}
 	userInfo, err := dao.GetUserByMobile(loginForm.Mobile)
@@ -29,18 +27,12 @@ func Login(c *gin.Context) {
 				UserName: "",
 			}
 			if err = dao.CreateUser(newUser); err != nil {
-				c.JSON(500, gin.H{
-					"code": 500,
-					"msg":  err,
-				})
+				response.InternalError(c, err.Error())
 				return
 			}
 			userInfo = newUser
 		} else {
-			c.JSON(500, gin.H{
-				"code": 500,
-				"msg":  err,
-			})
+			response.InternalError(c, err.Error())
 			return
 		}
 	}
@@ -49,6 +41,7 @@ func Login(c *gin.Context) {
 		ID:          userInfo.UserId,
 		NickName:    userInfo.UserName,
 		AuthorityId: uint(userInfo.Role),
+		Mobile:      loginForm.Mobile,
 		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Unix(),
 			ExpiresAt: time.Now().Unix() + 60*60*24*30,
@@ -58,14 +51,11 @@ func Login(c *gin.Context) {
 	token, err := j.CreateToken(claims)
 
 	if err != nil {
-		c.JSON(500, gin.H{
-			"code": 500,
-			"msg":  err,
-		})
+		response.InternalError(c, err.Error())
 		return
 	}
-	c.JSON(200, gin.H{
-		"msg":   "登陆成功",
+	response.Success(c, gin.H{
 		"token": token,
+		"msg":   "登陆成功",
 	})
 }

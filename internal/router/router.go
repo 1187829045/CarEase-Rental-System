@@ -38,7 +38,8 @@ func NewHTTPRouter() *gin.Engine {
 		api.GET("/detail/:id", carHandler.GetCarDetail)
 		api.POST("/update/:id", carHandler.UpdateCarInfo)
 	}
-	orders := api.Group("/orders")
+	orders := engine.Group("/car_rental/v1/orders")
+	orders.Use(middlewares.JWTAuth())
 	{
 		orders.GET("list", reservationHandler.ListOrders)                      //查询订单列表
 		orders.POST("create", reservationHandler.CreateOrder)                  //创建订单

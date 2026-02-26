@@ -15,6 +15,8 @@ type CustomClaims struct {
 	ID uint `json:"id"`
 	// 用户昵称
 	NickName string `json:"nickname"`
+	// 手机号
+	Mobile string `json:"mobile"`
 	// 权限ID，用于标识用户的权限级别
 	AuthorityId uint `json:"authority_id"`
 	// jwt.StandardClaims 是 JWT-go 库中预定义的标准声明结构体，包含了 JWT 的标准字段（如过期时间等）
@@ -58,6 +60,7 @@ func JWTAuth() gin.HandlerFunc {
 		// 将解析出的声明信息存储到上下文中
 		c.Set("claims", claims)
 		c.Set("userId", claims.ID)
+		c.Set("mobile", claims.Mobile)
 		c.Set("authorityId", claims.AuthorityId)
 
 		c.Next() // 继续处理请求
@@ -105,7 +108,7 @@ var (
 
 func NewJWT() *JWT {
 	return &JWT{
-		[]byte("llb"), // 从全局配置中获取签名密钥
+		SigningKey: []byte(consts.JWTIssuer), // 从全局配置中获取签名密钥
 	}
 }
 

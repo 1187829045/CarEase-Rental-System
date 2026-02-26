@@ -25,22 +25,23 @@ func NewHTTPRouter() *gin.Engine {
 		})
 	})
 	// router group.
+	// 登陆发送短信
 	auth := engine.Group("/car_rental/v1/auth")
 	{
 		auth.POST("/login", userHandler.Login)
 		auth.POST("/send_sms", userHandler.SendSMS)
 	}
-	api := engine.Group("/car_rental/v1")
+	api := engine.Group("/car_rental/v1/cars")
 	api.Use(middlewares.JWTAuth())
 	{
-		api.GET("/cars/create	", carHandler.GetListCars)
-		api.GET("/cars/detail/:id", carHandler.GetCarDetail)
-		api.PUT("/cars/update/:id", carHandler.UpdateCarInfo)
+		api.GET("/list", carHandler.GetListCars)
+		api.GET("/detail/:id", carHandler.GetCarDetail)
+		api.POST("/update/:id", carHandler.UpdateCarInfo)
 	}
 	orders := api.Group("/orders")
 	{
 		orders.GET("list", reservationHandler.ListOrders)                      //查询订单列表
-		orders.POST("create	", reservationHandler.CreateOrder)                 //创建订单
+		orders.POST("create", reservationHandler.CreateOrder)                  //创建订单
 		orders.GET("detail/:id", reservationHandler.GetOrderDetail)            //查询订单详情
 		orders.POST("pickup/:id", reservationHandler.PickupOrder)              //.car 取车
 		orders.POST("return/:id", reservationHandler.ReturnOrder)              //.car 还车

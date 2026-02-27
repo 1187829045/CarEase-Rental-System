@@ -2,6 +2,7 @@ package consts
 
 const (
 	JWTIssuer       = "3f1c8b46-7d29-4e5b-9b12-89f3c6a0d1e2"
+	UserRoleID      = 0 // 普通用户角色ID
 	AdminRoleID     = 1 // 管理员角色ID
 	InspectorRoleID = 2 // 检测师角色ID
 

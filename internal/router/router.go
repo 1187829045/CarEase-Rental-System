@@ -41,6 +41,12 @@ func NewHTTPRouter() *gin.Engine {
 		api.POST("/update", carHandler.UpdateCarInfo)
 		api.DELETE("/delete/:id", carHandler.DeleteCar)
 	}
+	api.Use(middlewares.JWTAuth(), middlewares.AdminOnly())
+	{
+		api.GET("/user_list", userHandler.GetUserList)
+		api.GET("/user/:id", userHandler.GetUserInfo)
+		api.PUT("/user/:id", userHandler.UpdateUserInfo)
+	}
 	orders := engine.Group("/car_rental/v1/orders")
 	orders.Use(middlewares.JWTAuth())
 	{
@@ -70,11 +76,5 @@ func NewHTTPRouter() *gin.Engine {
 	// 	inspections.GET(":id", inspection.GetInspectionDetail)     // 获取检测报告详情
 	// 	inspections.PUT(":id", inspection.UpdateInspection)        // 更新检测报告
 	// }
-	api.Use(middlewares.JWTAuth(), middlewares.AdminOnly())
-	{
-		api.GET("/user_list", userHandler.GetUserList)
-		api.GET("/user/:id", userHandler.GetUserInfo)
-		api.PUT("/user/:id", userHandler.UpdateUserInfo)
-	}
 	return engine
 }

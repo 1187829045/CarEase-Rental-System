@@ -12,5 +12,12 @@ type User struct {
 	UserName string     `gorm:"column:user_name;type:varchar(20)"`
 	Birthday *time.Time `gorm:"column:birthday;type:datetime"`
 	Gender   int8       `gorm:"column:gender;default:male;type:varchar(6) comment '0表示女, 1表示男'"`
-	Role     int8       `gorm:"column:role;default:0"`
+	Role     string     `gorm:"column:role;default:'user'"`      // 角色标识
+	BankCard string     `gorm:"column:bank_card;type:varchar(20)"` // 银行卡号
+	IDCard   string     `gorm:"column:id_card;type:varchar(18)"`   // 身份证号
+}
+
+// TableName 指定表名
+func (User) TableName() string {
+	return "user"
 }

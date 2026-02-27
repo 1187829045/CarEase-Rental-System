@@ -1,6 +1,7 @@
 package api
 
 import (
+	"encoding/json"
 	"time"
 
 	"car.rental/consts"
@@ -37,11 +38,19 @@ func Login(c *gin.Context) {
 		}
 	}
 	j := middlewares.NewJWT()
+	authorityIds := make([]string, 0)
+	if userInfo.Role != "" {
+		if err := json.Unmarshal([]byte(userInfo.Role), &authorityIds); err != nil {
+			response.InternalError(c, err.Error())
+			return
+		}
+	}
+
 	claims := middlewares.CustomClaims{
-		ID:          userInfo.UserId,
-		NickName:    userInfo.UserName,
-		AuthorityId: uint(userInfo.Role),
-		Mobile:      loginForm.Mobile,
+		ID:           userInfo.UserId,
+		NickName:     userInfo.UserName,
+		AuthorityIds: authorityIds,
+		Mobile:       loginForm.Mobile,
 		StandardClaims: jwt.StandardClaims{
 			NotBefore: time.Now().Unix(),
 			ExpiresAt: time.Now().Unix() + 60*60*24*30,

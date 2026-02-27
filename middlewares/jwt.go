@@ -18,7 +18,7 @@ type CustomClaims struct {
 	// 手机号
 	Mobile string `json:"mobile"`
 	// 权限ID，用于标识用户的权限级别
-	AuthorityId uint `json:"authority_id"`
+	AuthorityIds []string `json:"authority_ids"`
 	// jwt.StandardClaims 是 JWT-go 库中预定义的标准声明结构体，包含了 JWT 的标准字段（如过期时间等）
 	jwt.StandardClaims
 }
@@ -61,7 +61,7 @@ func JWTAuth() gin.HandlerFunc {
 		c.Set("claims", claims)
 		c.Set("userId", claims.ID)
 		c.Set("mobile", claims.Mobile)
-		c.Set("authorityId", claims.AuthorityId)
+		c.Set("authorityIds", claims.AuthorityIds)
 
 		c.Next() // 继续处理请求
 	}
@@ -79,7 +79,7 @@ func AdminOnly() gin.HandlerFunc {
 			return
 		}
 		claims, ok := claimsValue.(*CustomClaims)
-		if !ok || claims.AuthorityId != consts.AdminRoleID {
+		if !ok {
 			c.JSON(http.StatusForbidden, gin.H{
 				"code": http.StatusForbidden,
 				"msg":  "无权限",
@@ -87,6 +87,25 @@ func AdminOnly() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+		
+		// 检查是否包含管理员权限
+		hasAdmin := false
+		for _, role := range claims.AuthorityIds {
+			if role == "admin" {
+				hasAdmin = true
+				break
+			}
+		}
+		
+		if !hasAdmin {
+			c.JSON(http.StatusForbidden, gin.H{
+				"code": http.StatusForbidden,
+				"msg":  "无权限",
+			})
+			c.Abort()
+			return
+		}
+		
 		c.Next()
 	}
 }

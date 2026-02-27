@@ -66,7 +66,18 @@ func GetListCars(c *gin.Context) {
 			recover()
 			wg.Done()
 		}()
-		result, err := dao.ListCars(q.Status)
+		
+		// 处理OnlyMine参数
+		var userID *uint
+		if q.OnlyMine != nil && *q.OnlyMine {
+			if id, exists := c.Get("userId"); exists {
+				if uid, ok := id.(uint); ok {
+					userID = &uid
+				}
+			}
+		}
+		
+		result, err := dao.ListCars(q.Status, userID)
 		if err != nil {
 			listErr = err
 			return

@@ -6,6 +6,7 @@ import (
 
 type CarListQuery struct {
 	Status *int8 `form:"status"`
+	OnlyMine *bool `form:"only_mine"`
 }
 
 // CarResponse 车辆响应结构体

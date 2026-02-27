@@ -37,7 +37,9 @@ func NewHTTPRouter() *gin.Engine {
 	{
 		api.GET("/list", carHandler.GetListCars)
 		api.GET("/detail/:id", carHandler.GetCarDetail)
+		api.POST("/create", carHandler.CreateCar)
 		api.POST("/update", carHandler.UpdateCarInfo)
+		api.DELETE("/delete/:id", carHandler.DeleteCar)
 	}
 	orders := engine.Group("/car_rental/v1/orders")
 	orders.Use(middlewares.JWTAuth())

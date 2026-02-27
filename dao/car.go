@@ -17,10 +17,13 @@ func CreateCar(car *model.CarGoods) (err error) {
 }
 
 // ListCars 按条件筛选车辆列表
-func ListCars(status *int8) (cars []*model.CarGoods, err error) {
+func ListCars(status *int8, userID *uint) (cars []*model.CarGoods, err error) {
 	db := global.DB.Model(&model.CarGoods{})
 	if status != nil {
 		db = db.Where("status = ?", *status)
+	}
+	if userID != nil {
+		db = db.Where("user_id = ?", *userID)
 	}
 	result := db.Find(&cars)
 	if result.Error != nil {

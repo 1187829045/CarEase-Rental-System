@@ -6,6 +6,7 @@ import (
 	"time"
 
 	carHandler "car.rental/internal/api/car"
+	// "car.rental/internal/api/inspection"
 	reservationHandler "car.rental/internal/api/reservation"
 	userHandler "car.rental/internal/api/user"
 	"car.rental/middlewares"
@@ -59,6 +60,14 @@ func NewHTTPRouter() *gin.Engine {
 		reservations.POST("cancel/:id", reservationHandler.CancelReservation)   //取消预定单
 		reservations.POST("confirm/:id", reservationHandler.ConfirmReservation) //确认预定单
 	}
+
+	// // 检测报告路由
+	// inspections := api.Group("/inspections")
+	// {
+	// 	inspections.GET("", inspection.GetInspectionList)           // 获取检测报告列表
+	// 	inspections.GET(":id", inspection.GetInspectionDetail)     // 获取检测报告详情
+	// 	inspections.PUT(":id", inspection.UpdateInspection)        // 更新检测报告
+	// }
 	api.Use(middlewares.JWTAuth(), middlewares.AdminOnly())
 	{
 		api.GET("/user_list", userHandler.GetUserList)

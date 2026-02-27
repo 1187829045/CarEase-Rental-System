@@ -1,35 +1,73 @@
 package api
 
 import (
-	"net/http"
 	"strconv"
 
 	"car.rental/consts"
 	"car.rental/dao"
+	"car.rental/dao/model"
+	"car.rental/pkg/response"
+	_struct "car.rental/struct/car"
 	"github.com/gin-gonic/gin"
 )
 
 func GetCarDetail(c *gin.Context) {
-	idStr := c.Param("id")
+	idStr := c.Query("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"code": http.StatusBadRequest,
-			"msg":  consts.ErrInvalidParameter,
-		})
+		response.BadRequest(c, consts.ErrInvalidParameter)
 		return
 	}
 	car, err := dao.GetCarByID(uint(id))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": http.StatusInternalServerError,
-			"msg":  err.Error(),
-		})
+		response.InternalError(c, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"msg":  "ok",
-		"data": car,
-	})
+	// 获取该车辆的检测报告
+	carID := uint(id)
+	reports, err := dao.ListInspectionReports(nil, &carID, nil, nil, nil)
+	if err != nil {
+		response.InternalError(c, err.Error())
+		return
+	}
+	// 构建响应数据
+	responseData := buildCarDetailResponse(car, reports)
+
+	response.Success(c, responseData)
+}
+
+// buildCarDetailResponse 构建车辆详情响应数据
+func buildCarDetailResponse(car *model.CarGoods, reports []*model.InspectionReport) _struct.CarDetailResponse {
+	responseData := _struct.CarDetailResponse{
+		CarID:            car.CarID,
+		Brand:            car.Brand,
+		Model:            car.Model,
+		Color:            car.Color,
+		LicensePlate:     car.LicensePlate,
+		Displacement:     car.Displacement,
+		DriveType:        car.DriveType,
+		Status:           car.Status,
+		DailyRent:        car.DailyRent,
+		Mileage:          car.Mileage,
+		Description:      car.Description,
+		Image:            car.Image,
+		RegistrationDate: car.RegistrationDate.Format("2006-01-02"),
+	}
+
+	// 如果有检测报告，只返回最新的一个
+	if len(reports) > 0 {
+		report := reports[0] // ListInspectionReports 已经按时间倒序排序
+		responseData.ReportID = report.ReportID
+		responseData.InspectorName = report.InspectorName
+		responseData.InspectionType = report.Type
+		responseData.InspectionMileage = report.Mileage
+		responseData.Exterior = report.Exterior
+		responseData.Interior = report.Interior
+		responseData.Notes = report.Notes
+		responseData.Photos = report.Photos
+		responseData.InspectionTime = report.InspectionTime.Format("2006-01-02 15:04:05")
+		responseData.InspectionStatus = report.Status
+	}
+
+	return responseData
 }

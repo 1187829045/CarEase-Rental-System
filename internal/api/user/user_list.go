@@ -5,10 +5,9 @@ import (
 	"net/http"
 
 	"car.rental/dao"
-	"car.rental/pkg/response"
 	_struct "car.rental/struct/user"
+	"car.rental/tools"
 	"github.com/gin-gonic/gin"
-	"strconv"
 )
 
 func GetUserList(c *gin.Context) {
@@ -23,13 +22,18 @@ func GetUserList(c *gin.Context) {
 	}
 	items := make([]_struct.UserInfo, 0, len(users))
 	for _, user := range users {
-		authorityIds := make([]string, 0)
+		// 处理角色
+		var roleStrings []string
 		if user.Role != "" {
-			if err := json.Unmarshal([]byte(user.Role), &authorityIds); err != nil {
-				response.InternalError(c, err.Error())
-				return
+			if err := json.Unmarshal([]byte(user.Role), &roleStrings); err != nil {
+				// 如果解析失败，说明是单个角色字符串
+				roleStrings = []string{user.Role}
 			}
 		}
+		
+		// 使用工具函数转换角色
+		authorityIds := tools.ConvertStringRolesToInt8(roleStrings)
+		
 		items = append(items, _struct.UserInfo{
 			ID:       user.UserId,
 			Mobile:   user.Mobile,

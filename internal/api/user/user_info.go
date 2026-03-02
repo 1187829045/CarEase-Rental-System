@@ -9,6 +9,7 @@ import (
 	"car.rental/dao"
 	"car.rental/pkg/response"
 	_struct "car.rental/struct/user"
+	"car.rental/tools"
 	"github.com/gin-gonic/gin"
 )
 
@@ -43,7 +44,7 @@ func GetUserInfo(c *gin.Context) {
 		UserName: user.UserName,
 		Birthday: user.Birthday,
 		Gender:   user.Gender,
-		Role:     authorityIds,
+		Role:     tools.ConvertStringRolesToInt8(authorityIds),
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code": http.StatusOK,

@@ -45,7 +45,7 @@ type InspectionListResp struct {
 type InspectionReportResponse struct {
 	ReportID       uint   `json:"report_id"`       // 报告ID
 	CarID          uint   `json:"car_id"`          // 车辆ID
-	InspectorID    uint   `json:"inspector_id"`    // 检测人ID
+	UserID         uint   `json:"user_id"`         // 用户ID
 	Type           int8   `json:"type"`            // 检测类型
 	Mileage        int64  `json:"mileage"`         // 里程数
 	Exterior       string `json:"exterior"`        // 外观检测
@@ -55,4 +55,7 @@ type InspectionReportResponse struct {
 	InspectorName  string `json:"inspector_name"`  // 检测人姓名
 	InspectionTime string `json:"inspection_time"` // 检测时间
 	Status         int8   `json:"status"`          // 状态
+	UserName       string `json:"user_name"`       // 用户名
+	Mobile         string `json:"mobile"`          // 手机号
 }
+

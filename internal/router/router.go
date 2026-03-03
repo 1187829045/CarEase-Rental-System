@@ -7,6 +7,7 @@ import (
 
 	carHandler "car.rental/internal/api/car"
 	inspectionHandler "car.rental/internal/api/inspection"
+	orderHandler "car.rental/internal/api/order"
 	userHandler "car.rental/internal/api/user"
 	"car.rental/middlewares"
 	"github.com/gin-gonic/gin"
@@ -48,6 +49,7 @@ func NewHTTPRouter() *gin.Engine {
 		inspections.GET("detail/:id", inspectionHandler.GetInspectionDetail) // 检测单详情
 		inspections.POST("update", inspectionHandler.UpdateInspection)       // 检测更新
 	}
+
 	api.Use(middlewares.JWTAuth(), middlewares.AdminOnly())
 	{
 		api.GET("/user_list", userHandler.GetUserList)
@@ -57,5 +59,14 @@ func NewHTTPRouter() *gin.Engine {
 		api.GET("/user/deatil/:id", userHandler.GetUserInfo)
 		api.POST("/user/update", userHandler.UpdateUserInfo)
 	}
+
+	// 订单路由
+	orders := api.Group("/orders").Use(middlewares.JWTAuth(), middlewares.AdminOnly())
+	{
+		orders.GET("/list", orderHandler.GetOrderList)         // 订单列表
+		orders.POST("/create", orderHandler.CreateOrder)       // 创建订单
+		orders.GET("/detail/:id", orderHandler.GetOrderDetail) // 订单详情
+	}
+
 	return engine
 }

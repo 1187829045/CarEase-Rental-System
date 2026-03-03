@@ -74,7 +74,7 @@ func GetInspectionList(c *gin.Context) {
 		resp.Items[i] = &inspection.InspectionReportResponse{
 			ReportID:       report.ReportID,
 			CarID:          report.CarID,
-			InspectorID:    report.InspectorID,
+			UserID:    report.InspectorID,
 			Type:           report.Type,
 			Mileage:        report.Mileage,
 			Exterior:       report.Exterior,

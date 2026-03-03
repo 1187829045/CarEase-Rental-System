@@ -66,7 +66,7 @@ func GetListCars(c *gin.Context) {
 			recover()
 			wg.Done()
 		}()
-		
+
 		// 处理OnlyMine参数
 		var userID *uint
 		if q.OnlyMine != nil && *q.OnlyMine {
@@ -76,13 +76,15 @@ func GetListCars(c *gin.Context) {
 				}
 			}
 		}
-		
+
 		result, err := dao.ListCars(q.Status, userID)
 		if err != nil {
 			listErr = err
 			return
 		}
-		cars = _struct.ConvertToCarResponse(result)
+		// 从token中获取权限信息
+		authorityIds, _ := c.Get("authorityIds")
+		cars = _struct.ConvertToCarResponse(result, authorityIds.(string))
 	}()
 
 	wg.Wait()

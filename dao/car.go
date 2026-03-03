@@ -88,3 +88,9 @@ func GetAvailableCars() (cars []*model.CarGoods, err error) {
 	}
 	return cars, nil
 }
+
+// UpdateCarStatus 更新车辆状态
+func UpdateCarStatus(carID uint, status int8) error {
+	result := global.DB.Model(&model.CarGoods{}).Where("car_id = ?", carID).Update("status", status)
+	return result.Error
+}

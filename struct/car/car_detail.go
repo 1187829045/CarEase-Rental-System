@@ -28,4 +28,7 @@ type CarDetailResponse struct {
 	Photos           string  `json:"photos,omitempty"`           // 照片URL
 	InspectionTime   string  `json:"inspection_time,omitempty"`   // 检测时间
 	InspectionStatus int8    `json:"inspection_status,omitempty"` // 检测状态（0:待审核, 1:已通过, 2:已拒绝）
+
+	// 功能按钮
+	ShowRentButton   bool    `json:"show_rent_button"`   // 是否展示租借按钮
 }

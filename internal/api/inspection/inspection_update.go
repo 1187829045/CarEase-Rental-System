@@ -1,7 +1,6 @@
 package api
 
 import (
-	"strconv"
 	"time"
 
 	"car.rental/consts"
@@ -13,13 +12,6 @@ import (
 
 // UpdateInspection 检测更新
 func UpdateInspection(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		response.BadRequest(c, consts.ErrInvalidParameter)
-		return
-	}
-
 	var updateData inspection.InspectionUpdate
 	if err := c.ShouldBindJSON(&updateData); err != nil {
 		response.BadRequest(c, consts.ErrInvalidParameter)
@@ -27,7 +19,7 @@ func UpdateInspection(c *gin.Context) {
 	}
 
 	// 获取现有报告
-	report, err := dao.GetInspectionReportByID(uint(id))
+	report, err := dao.GetInspectionReportByID(updateData.ReportID)
 	if err != nil {
 		response.InternalError(c, err.Error())
 		return
@@ -55,7 +47,6 @@ func UpdateInspection(c *gin.Context) {
 	if updateData.Status != nil {
 		report.Status = *updateData.Status
 	}
-
 	// 如果状态变为已通过或已拒绝，更新检测时间
 	if updateData.Status != nil && (*updateData.Status == 1 || *updateData.Status == 2) {
 		report.InspectionTime = time.Now()
@@ -66,5 +57,12 @@ func UpdateInspection(c *gin.Context) {
 		return
 	}
 
+	// 如果检测通过，更新车辆状态为可用
+	if updateData.Status != nil && *updateData.Status == 1 {
+		if err := dao.UpdateCarStatus(report.CarID, 1); err != nil {
+			response.InternalError(c, "更新车辆状态失败: "+err.Error())
+			return
+		}
+	}
 	response.Success(c, report)
 }

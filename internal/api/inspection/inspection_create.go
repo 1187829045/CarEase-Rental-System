@@ -29,7 +29,7 @@ func CreateInspection(c *gin.Context) {
 	// 创建检测报告
 	report := &model.InspectionReport{
 		CarID:          createData.CarID,
-		UserID:         userID.(uint),
+		InspectorID:    userID.(uint),
 		Type:           createData.Type,
 		Mileage:        createData.Mileage,
 		Exterior:       createData.Exterior,
@@ -38,7 +38,7 @@ func CreateInspection(c *gin.Context) {
 		Photos:         createData.Photos,
 		InspectorName:  createData.InspectorName,
 		InspectionTime: time.Now(),
-		Status:         0, // 初始状态为待审核
+		Status:         0,
 	}
 
 	if err := dao.CreateInspectionReport(report); err != nil {

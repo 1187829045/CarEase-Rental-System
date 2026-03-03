@@ -28,19 +28,16 @@ func UpdateInspectionReport(report *model.InspectionReport) error {
 }
 
 // ListInspectionReports 检测报告列表
-func ListInspectionReports(orderID, carID, userID *uint, reportType *int8, status *int8) ([]*model.InspectionReport, error) {
+func ListInspectionReports(carID, inspectorID *uint, reportType *int8, status *int8) ([]*model.InspectionReport, error) {
 	var reports []*model.InspectionReport
 	db := global.DB.Model(&model.InspectionReport{})
 
 	// 筛选条件
-	if orderID != nil {
-		db = db.Where("order_id = ?", *orderID)
+	if inspectorID != nil {
+		db = db.Where("order_id = ?", *inspectorID)
 	}
 	if carID != nil {
 		db = db.Where("car_id = ?", *carID)
-	}
-	if userID != nil {
-		db = db.Where("user_id = ?", *userID)
 	}
 	if reportType != nil {
 		db = db.Where("type = ?", *reportType)
@@ -57,12 +54,22 @@ func ListInspectionReports(orderID, carID, userID *uint, reportType *int8, statu
 	return reports, nil
 }
 
-// GetInspectionReportByOrderAndType 根据订单ID和检测类型获取检测报告
-func GetInspectionReportByOrderAndType(orderID uint, reportType int8) (*model.InspectionReport, error) {
+// GetLatestInspectionReportByCarID 根据车辆ID获取最新的检测报告
+func GetLatestInspectionReportByCarID(carID uint) (*model.InspectionReport, error) {
 	var report model.InspectionReport
-	result := global.DB.Where("order_id = ? AND type = ?", orderID, reportType).First(&report)
+	result := global.DB.Where("car_id = ?", carID).Order("created_at DESC").First(&report)
 	if result.Error != nil {
 		return nil, result.Error
 	}
 	return &report, nil
+}
+
+// CountInspectionReportsByStatus 统计检测报告的状态数量
+func CountInspectionReportsByStatus(status int8) (int64, error) {
+	var count int64
+	result := global.DB.Model(&model.InspectionReport{}).Where("status = ?", status).Count(&count)
+	if result.Error != nil {
+		return 0, result.Error
+	}
+	return count, nil
 }

@@ -25,19 +25,19 @@ func GetCarDetail(c *gin.Context) {
 	}
 	// 获取该车辆的检测报告
 	carID := uint(id)
-	reports, err := dao.ListInspectionReports(nil, &carID, nil, nil, nil)
+	report, err := dao.GetLatestInspectionReportByCarID(carID)
 	if err != nil {
 		response.InternalError(c, err.Error())
 		return
 	}
 	// 构建响应数据
-	responseData := buildCarDetailResponse(car, reports)
+	responseData := buildCarDetailResponse(car, report)
 
 	response.Success(c, responseData)
 }
 
 // buildCarDetailResponse 构建车辆详情响应数据
-func buildCarDetailResponse(car *model.CarGoods, reports []*model.InspectionReport) _struct.CarDetailResponse {
+func buildCarDetailResponse(car *model.CarGoods, report *model.InspectionReport) _struct.CarDetailResponse {
 	responseData := _struct.CarDetailResponse{
 		CarID:            car.CarID,
 		Brand:            car.Brand,
@@ -52,21 +52,23 @@ func buildCarDetailResponse(car *model.CarGoods, reports []*model.InspectionRepo
 		Description:      car.Description,
 		Image:            car.Image,
 		RegistrationDate: car.RegistrationDate.Format("2006-01-02"),
+		ShowRentButton:   false, // 默认不展示租借按钮
 	}
 
-	// 如果有检测报告，只返回最新的一个
-	if len(reports) > 0 {
-		report := reports[0] // ListInspectionReports 已经按时间倒序排序
-		responseData.ReportID = report.ReportID
-		responseData.InspectorName = report.InspectorName
-		responseData.InspectionType = report.Type
-		responseData.InspectionMileage = report.Mileage
-		responseData.Exterior = report.Exterior
-		responseData.Interior = report.Interior
-		responseData.Notes = report.Notes
-		responseData.Photos = report.Photos
-		responseData.InspectionTime = report.InspectionTime.Format("2006-01-02 15:04:05")
-		responseData.InspectionStatus = report.Status
+	responseData.ReportID = report.ReportID
+	responseData.InspectorName = report.InspectorName
+	responseData.InspectionType = report.Type
+	responseData.InspectionMileage = report.Mileage
+	responseData.Exterior = report.Exterior
+	responseData.Interior = report.Interior
+	responseData.Notes = report.Notes
+	responseData.Photos = report.Photos
+	responseData.InspectionTime = report.InspectionTime.Format("2006-01-02 15:04:05")
+	responseData.InspectionStatus = report.Status
+
+	// 当车辆状态为可用且检测状态为已通过时，展示租借按钮
+	if car.Status == 1 && report.Status == 1 {
+		responseData.ShowRentButton = true
 	}
 
 	return responseData

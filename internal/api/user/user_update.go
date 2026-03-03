@@ -1,8 +1,8 @@
 package api
 
 import (
-	"encoding/json"
 	"net/http"
+	"strings"
 
 	"car.rental/consts"
 	"car.rental/dao"
@@ -28,17 +28,10 @@ func UpdateUserInfo(c *gin.Context) {
 	}
 
 	// 检查权限：只有管理员或用户本人可以访问
-	authorityIds, authExists := c.Get("authorityIds")
+	authorityIds, _ := c.Get("authorityIds")
 	isAdmin := false
-	if authExists {
-		if authIDs, ok := authorityIds.([]string); ok {
-			for _, role := range authIDs {
-				if role == "admin" {
-					isAdmin = true
-					break
-				}
-			}
-		}
+	if strings.Contains(authorityIds.(string), "1") {
+		isAdmin = true
 	}
 
 	// 如果不是管理员且不是用户本人，返回无权限
@@ -67,13 +60,7 @@ func UpdateUserInfo(c *gin.Context) {
 		user.Gender = *form.Gender
 	}
 	if len(form.Role) > 0 {
-		// 将Role转换为JSON字符串
-		roleJSON, err := json.Marshal(form.Role)
-		if err == nil {
-			user.Role = string(roleJSON)
-		} else {
-			user.Role = ""
-		}
+		user.Role = form.Role
 	}
 	if err := dao.UpdateUser(user); err != nil {
 		response.InternalError(c, err.Error())

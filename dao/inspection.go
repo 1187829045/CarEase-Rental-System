@@ -14,7 +14,7 @@ func CreateInspectionReport(report *model.InspectionReport) error {
 // GetInspectionReportByID 根据ID获取检测报告
 func GetInspectionReportByID(reportID uint) (*model.InspectionReport, error) {
 	var report model.InspectionReport
-	result := global.DB.Where("report_id = ?", reportID).First(&report)
+	result := global.DB.Where("report_id = ?", reportID).Find(&report)
 	if result.Error != nil {
 		return nil, result.Error
 	}
@@ -27,17 +27,11 @@ func UpdateInspectionReport(report *model.InspectionReport) error {
 	return result.Error
 }
 
-// DeleteInspectionReport 删除检测报告
-func DeleteInspectionReport(reportID uint) error {
-	result := global.DB.Delete(&model.InspectionReport{}, reportID)
-	return result.Error
-}
-
-// ListInspectionReports 列出检测报告
+// ListInspectionReports 检测报告列表
 func ListInspectionReports(orderID, carID, userID *uint, reportType *int8, status *int8) ([]*model.InspectionReport, error) {
 	var reports []*model.InspectionReport
 	db := global.DB.Model(&model.InspectionReport{})
-	
+
 	// 筛选条件
 	if orderID != nil {
 		db = db.Where("order_id = ?", *orderID)
@@ -54,7 +48,7 @@ func ListInspectionReports(orderID, carID, userID *uint, reportType *int8, statu
 	if status != nil {
 		db = db.Where("status = ?", *status)
 	}
-	
+
 	// 按检测时间倒序排序
 	result := db.Order("inspection_time DESC").Find(&reports)
 	if result.Error != nil {

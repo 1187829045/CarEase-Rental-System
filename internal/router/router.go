@@ -6,8 +6,7 @@ import (
 	"time"
 
 	carHandler "car.rental/internal/api/car"
-	// "car.rental/internal/api/inspection"
-	reservationHandler "car.rental/internal/api/reservation"
+	inspectionHandler "car.rental/internal/api/inspection"
 	userHandler "car.rental/internal/api/user"
 	"car.rental/middlewares"
 	"github.com/gin-gonic/gin"
@@ -41,6 +40,14 @@ func NewHTTPRouter() *gin.Engine {
 		api.POST("/update", carHandler.UpdateCarInfo)
 		api.DELETE("/delete/:id", carHandler.DeleteCar)
 	}
+	// 检测报告路由
+	inspections := api.Group("/inspections").Use(middlewares.JWTAuth())
+	{
+		inspections.POST("create", inspectionHandler.CreateInspection)       // 发起检测
+		inspections.GET("list", inspectionHandler.GetInspectionList)         // 获取检测报告列表
+		inspections.GET("detail/:id", inspectionHandler.GetInspectionDetail) // 检测单详情
+		inspections.POST("update", inspectionHandler.UpdateInspection)       // 检测更新
+	}
 	api.Use(middlewares.JWTAuth(), middlewares.AdminOnly())
 	{
 		api.GET("/user_list", userHandler.GetUserList)
@@ -50,34 +57,5 @@ func NewHTTPRouter() *gin.Engine {
 		api.GET("/user/deatil/:id", userHandler.GetUserInfo)
 		api.POST("/user/update", userHandler.UpdateUserInfo)
 	}
-	orders := engine.Group("/car_rental/v1/orders")
-	orders.Use(middlewares.JWTAuth())
-	{
-		orders.GET("list", reservationHandler.ListOrders)                      //查询订单列表
-		orders.POST("create", reservationHandler.CreateOrder)                  //创建订单
-		orders.GET("detail/:id", reservationHandler.GetOrderDetail)            //查询订单详情
-		orders.POST("pickup/:id", reservationHandler.PickupOrder)              //.car 取车
-		orders.POST("return/:id", reservationHandler.ReturnOrder)              //.car 还车
-		orders.POST("extend/:id", reservationHandler.ExtendOrder)              //.order 订单延长
-		orders.POST("damage_report/:id", reservationHandler.DamageReportOrder) //.order 订单损坏上报
-		orders.POST("cancel/:id", reservationHandler.CancelOrder)              //.order 订单取消
-	}
-	reservations := api.Group("/reservations")
-	{
-		reservations.POST("create", reservationHandler.CreateReservation)       //创建预定单
-		reservations.GET("list", reservationHandler.ListReservations)           //查询预定单列表
-		reservations.GET("detail/:id", reservationHandler.GetReservationDetail) //查询于订单详情
-		reservations.PUT("update/:id", reservationHandler.UpdateReservation)    //更新预定单
-		reservations.POST("cancel/:id", reservationHandler.CancelReservation)   //取消预定单
-		reservations.POST("confirm/:id", reservationHandler.ConfirmReservation) //确认预定单
-	}
-
-	// // 检测报告路由
-	// inspections := api.Group("/inspections")
-	// {
-	// 	inspections.GET("", inspection.GetInspectionList)           // 获取检测报告列表
-	// 	inspections.GET(":id", inspection.GetInspectionDetail)     // 获取检测报告详情
-	// 	inspections.PUT(":id", inspection.UpdateInspection)        // 更新检测报告
-	// }
 	return engine
 }

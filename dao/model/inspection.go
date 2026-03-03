@@ -10,7 +10,7 @@ type InspectionReport struct {
 	ReportID       uint      `gorm:"column:report_id;primaryKey;autoIncrement"`             // 报告ID
 	CarID          uint      `gorm:"column:car_id;index"`                                   // 车辆ID
 	UserID         uint      `gorm:"column:user_id;index"`                                  // 用户ID
-	Type           int8      `gorm:"column:type;comment '1:取车检测, 2:还车检测'"`                  // 检测类型
+	Type           int8      `gorm:"column:type;comment '1:上架检测, 2:还车检测'"`             // 检测类型
 	Mileage        int64     `gorm:"column:mileage"`                                        // 里程数
 	Exterior       string    `gorm:"column:exterior;type:text"`                             // 外观检测
 	Interior       string    `gorm:"column:interior;type:text"`                             // 内饰检测

@@ -1,53 +1,17 @@
 package api
 
 import (
-	// "net/http"
 	"strconv"
+	"time"
 
 	"car.rental/consts"
 	"car.rental/dao"
-	// "car.rental/dao/model"
 	"car.rental/pkg/response"
 	"car.rental/struct/inspection"
 	"github.com/gin-gonic/gin"
 )
 
-// GetInspectionList 获取检测报告列表
-func GetInspectionList(c *gin.Context) {
-	var q inspection.InspectionListQuery
-	if err := c.ShouldBindQuery(&q); err != nil {
-		response.BadRequest(c, consts.ErrInvalidParameter)
-		return
-	}
-
-	reports, err := dao.ListInspectionReports(q.OrderID, q.CarID, q.UserID, q.Type, q.Status)
-	if err != nil {
-		response.InternalError(c, err.Error())
-		return
-	}
-
-	response.Success(c, reports)
-}
-
-// GetInspectionDetail 获取检测报告详情
-func GetInspectionDetail(c *gin.Context) {
-	idStr := c.Param("id")
-	id, err := strconv.ParseUint(idStr, 10, 64)
-	if err != nil {
-		response.BadRequest(c, consts.ErrInvalidParameter)
-		return
-	}
-
-	report, err := dao.GetInspectionReportByID(uint(id))
-	if err != nil {
-		response.InternalError(c, err.Error())
-		return
-	}
-
-	response.Success(c, report)
-}
-
-// UpdateInspection 更新检测报告
+// UpdateInspection 检测更新
 func UpdateInspection(c *gin.Context) {
 	idStr := c.Param("id")
 	id, err := strconv.ParseUint(idStr, 10, 64)
@@ -90,6 +54,11 @@ func UpdateInspection(c *gin.Context) {
 	}
 	if updateData.Status != nil {
 		report.Status = *updateData.Status
+	}
+
+	// 如果状态变为已通过或已拒绝，更新检测时间
+	if updateData.Status != nil && (*updateData.Status == 1 || *updateData.Status == 2) {
+		report.InspectionTime = time.Now()
 	}
 
 	if err := dao.UpdateInspectionReport(report); err != nil {

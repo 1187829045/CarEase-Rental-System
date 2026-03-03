@@ -1,10 +1,11 @@
 package dao
 
 import (
+	"errors"
+
 	"car.rental/consts"
 	"car.rental/dao/model"
 	"car.rental/global"
-	"errors"
 )
 
 func GetUserByMobile(mobile string) (user *model.User, err error) {
@@ -47,10 +48,35 @@ func UpdateUser(user *model.User) (err error) {
 	return nil
 }
 
-func ListUsers() (users []*model.User, err error) {
-	result := global.DB.Find(&users)
-	if result.Error != nil {
-		return nil, result.Error
+// ListUsersWithPagination 分页获取用户列表，支持角色筛选
+func ListUsersWithPagination(page, pageSize int, role string) (users []*model.User, total int64, err error) {
+	if page < 1 {
+		page = 1
 	}
-	return users, nil
+	if pageSize < 1 || pageSize > 100 {
+		pageSize = 10
+	}
+
+	offset := (page - 1) * pageSize
+
+	// 构建查询
+	query := global.DB.Model(&model.User{})
+
+	// 角色筛选
+	if role != "" {
+		query = query.Where("role LIKE ?", "%"+role+"%")
+	}
+
+	// 计算总数
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	// 分页查询
+	result := query.Order("created_at DESC").Offset(offset).Limit(pageSize).Find(&users)
+	if result.Error != nil {
+		return nil, 0, result.Error
+	}
+
+	return users, total, nil
 }

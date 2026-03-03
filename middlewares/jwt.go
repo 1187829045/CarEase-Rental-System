@@ -2,10 +2,11 @@ package middlewares
 
 import (
 	"errors"
-	"net/http"
+	"strings"
 	"time"
 
 	"car.rental/consts"
+	"car.rental/pkg/response"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 )
@@ -18,7 +19,7 @@ type CustomClaims struct {
 	// 手机号
 	Mobile string `json:"mobile"`
 	// 权限ID，用于标识用户的权限级别
-	AuthorityIds []string `json:"authority_ids"`
+	AuthorityIds string `json:"authority_ids"`
 	// jwt.StandardClaims 是 JWT-go 库中预定义的标准声明结构体，包含了 JWT 的标准字段（如过期时间等）
 	jwt.StandardClaims
 }
@@ -31,9 +32,7 @@ func JWTAuth() gin.HandlerFunc {
 		token := c.Request.Header.Get("x-token")
 		if token == "" {
 			// 如果没有 token，返回 401 未授权状态码和提示信息
-			c.JSON(http.StatusUnauthorized, map[string]string{
-				"msg": "请登录",
-			})
+			response.Unauthorized(c, "请登录")
 			c.Abort() // 中止请求
 			return
 		}
@@ -44,15 +43,13 @@ func JWTAuth() gin.HandlerFunc {
 		if err != nil {
 			if err == TokenExpired {
 				// 如果 token 已过期，返回 401 状态码和授权过期提示
-				c.JSON(http.StatusUnauthorized, map[string]string{
-					"msg": "授权已过期",
-				})
+				response.Unauthorized(c, "授权已过期")
 				c.Abort() // 中止请求
 				return
 			}
 
 			// 其他错误返回未登录提示
-			c.JSON(http.StatusUnauthorized, "未登陆")
+			response.Unauthorized(c, "未登陆")
 			c.Abort() // 中止请求
 			return
 		}
@@ -71,41 +68,29 @@ func AdminOnly() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		claimsValue, ok := c.Get("claims")
 		if !ok {
-			c.JSON(http.StatusUnauthorized, gin.H{
-				"code": http.StatusUnauthorized,
-				"msg":  consts.ErrNoLogin,
-			})
+			response.Unauthorized(c, consts.ErrNoLogin)
 			c.Abort()
 			return
 		}
 		claims, ok := claimsValue.(*CustomClaims)
 		if !ok {
-			c.JSON(http.StatusForbidden, gin.H{
-				"code": http.StatusForbidden,
-				"msg":  "无权限",
-			})
+			response.Forbidden(c, "无权限")
 			c.Abort()
 			return
 		}
-		
-		// 检查是否包含管理员权限
+
+		// 检查是否包含管理员权限，如果是管理员则跳过检查
 		hasAdmin := false
-		for _, role := range claims.AuthorityIds {
-			if role == "admin" {
-				hasAdmin = true
-				break
-			}
+		if strings.Contains(claims.AuthorityIds, "ad1min") {
+			hasAdmin = true
 		}
-		
+
 		if !hasAdmin {
-			c.JSON(http.StatusForbidden, gin.H{
-				"code": http.StatusForbidden,
-				"msg":  "无权限",
-			})
+			response.Forbidden(c, "无权限")
 			c.Abort()
 			return
 		}
-		
+
 		c.Next()
 	}
 }

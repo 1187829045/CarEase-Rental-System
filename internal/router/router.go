@@ -44,8 +44,11 @@ func NewHTTPRouter() *gin.Engine {
 	api.Use(middlewares.JWTAuth(), middlewares.AdminOnly())
 	{
 		api.GET("/user_list", userHandler.GetUserList)
-		api.GET("/user/:id", userHandler.GetUserInfo)
-		api.PUT("/user/:id", userHandler.UpdateUserInfo)
+	}
+	api.Use(middlewares.JWTAuth())
+	{
+		api.GET("/user/deatil/:id", userHandler.GetUserInfo)
+		api.POST("/user/update", userHandler.UpdateUserInfo)
 	}
 	orders := engine.Group("/car_rental/v1/orders")
 	orders.Use(middlewares.JWTAuth())

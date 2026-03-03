@@ -6,6 +6,7 @@ import (
 
 	"car.rental/consts"
 	"car.rental/dao"
+	"car.rental/pkg/response"
 	_struct "car.rental/struct/user"
 	"github.com/gin-gonic/gin"
 )
@@ -17,6 +18,32 @@ func UpdateUserInfo(c *gin.Context) {
 			"code": http.StatusBadRequest,
 			"msg":  consts.ErrInvalidParameter,
 		})
+		return
+	}
+	// 获取当前用户信息
+	currentUserID, exists := c.Get("userId")
+	if !exists {
+		response.Unauthorized(c, "用户未登录")
+		return
+	}
+
+	// 检查权限：只有管理员或用户本人可以访问
+	authorityIds, authExists := c.Get("authorityIds")
+	isAdmin := false
+	if authExists {
+		if authIDs, ok := authorityIds.([]string); ok {
+			for _, role := range authIDs {
+				if role == "admin" {
+					isAdmin = true
+					break
+				}
+			}
+		}
+	}
+
+	// 如果不是管理员且不是用户本人，返回无权限
+	if !isAdmin && currentUserID.(uint) != uint(form.ID) {
+		response.Forbidden(c, "无权限访问该用户信息")
 		return
 	}
 	user, err := dao.GetUserByID(form.ID)
@@ -45,20 +72,12 @@ func UpdateUserInfo(c *gin.Context) {
 		if err == nil {
 			user.Role = string(roleJSON)
 		} else {
-			// 如果JSON转换失败，直接存储为字符串
 			user.Role = ""
 		}
 	}
 	if err := dao.UpdateUser(user); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"code": http.StatusInternalServerError,
-			"msg":  err.Error(),
-		})
+		response.InternalError(c, err.Error())
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{
-		"code": http.StatusOK,
-		"msg":  "ok",
-		"data": nil,
-	})
+	response.Success(c, nil)
 }

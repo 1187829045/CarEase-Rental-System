@@ -50,3 +50,13 @@ func InternalError(c *gin.Context, msg string) {
 func TooManyRequests(c *gin.Context, msg string) {
 	Error(c, 429, msg)
 }
+
+// Unauthorized 未授权
+func Unauthorized(c *gin.Context, msg string) {
+	Error(c, 401, msg)
+}
+
+// Forbidden 禁止访问
+func Forbidden(c *gin.Context, msg string) {
+	Error(c, 403, msg)
+}

@@ -1,5 +1,6 @@
 package order
 
+
 // OrderListQuery 订单列表查询参数
 type OrderListQuery struct {
 	Status *int8 `form:"status" query:"status"` // 订单状态
@@ -36,7 +37,6 @@ type OrderResponse struct {
 type OrderDetailResponse struct {
 	Order *OrderResponse `json:"order"` // 订单信息
 	Car   *CarInfo       `json:"car"`   // 车辆信息
-	Store *StoreInfo     `json:"store"` // 门店信息
 	User  *UserInfo      `json:"user"`  // 用户信息
 }
 
@@ -67,4 +67,20 @@ type UserInfo struct {
 type OrderListResp struct {
 	Items  []*OrderResponse `json:"items"`  // 订单列表
 	Counts map[int8]int64   `json:"counts"` // 各状态数量
+}
+
+// OrderAction 订单操作请求
+type OrderAction struct {
+	OrderID       uint    `json:"order_id" binding:"required"` // 订单ID
+	Action        string  `json:"action" binding:"required,oneof=pickup return extend"` // 操作类型：pickup(取车)、return(还车)、extend(续租)
+	Mileage       *int64  `json:"mileage"`       // 里程数（取车/还车时使用）
+	Fuel          *float64 `json:"fuel"`          // 油量（取车/还车时使用）
+	Photos        *string  `json:"photos"`        // 照片URL（取车/还车时使用）
+	ExtendEndTime *string  `json:"extend_end_time"` // 续租结束时间（续租时使用）
+}
+
+// OrderCancel 取消订单请求
+type OrderCancel struct {
+	OrderID uint   `json:"order_id" binding:"required"` // 订单ID
+	Reason  string `json:"reason"`                      // 取消原因
 }

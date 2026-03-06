@@ -8,6 +8,7 @@ import (
 	"car.rental/pkg/response"
 	"car.rental/struct/order"
 	"github.com/gin-gonic/gin"
+	"car.rental/internal/api/common"
 )
 
 // GetOrderDetail 订单详情
@@ -23,6 +24,11 @@ func GetOrderDetail(c *gin.Context) {
 	orderModel, err := dao.GetOrderByID(uint(id))
 	if err != nil {
 		response.InternalError(c, err.Error())
+		return
+	}
+
+	// 检查用户权限
+	if !common.CheckOrderPermission(orderModel.UserID, c) {
 		return
 	}
 
@@ -46,10 +52,9 @@ func GetOrderDetail(c *gin.Context) {
 
 	// 构建响应数据
 	responseData := &order.OrderDetailResponse{
-		Order:  orderResp,
-		Car:    nil,
-		Store:  nil,
-		User:   nil,
+		Order: orderResp,
+		Car:   nil,
+		User:  nil,
 	}
 
 	// 获取车辆信息
@@ -73,9 +78,5 @@ func GetOrderDetail(c *gin.Context) {
 			Mobile:   user.Mobile,
 		}
 	}
-
-	// 这里可以添加获取门店信息的代码
-	// 暂时留空
-
 	response.Success(c, responseData)
 }

@@ -1,11 +1,11 @@
 package api
 
 import (
-	"strings"
 	"sync"
 
 	"car.rental/consts"
 	"car.rental/dao"
+	"car.rental/internal/api/common"
 	"car.rental/pkg/response"
 	"car.rental/struct/order"
 	"github.com/gin-gonic/gin"
@@ -23,17 +23,22 @@ func GetOrderList(c *gin.Context) {
 	resp := order.OrderListResp{}
 	resp.Counts = make(map[int8]int64)
 
+	// 获取订单查询的用户ID
+	queryUserID, ok := common.GetOrderQueryUserID(c)
+	if !ok {
+		return
+	}
+
 	// 并发查询各种状态的数量
 	wg := sync.WaitGroup{}
 	wg.Add(5)
-
 	// 待取车数量
 	go func() {
 		defer func() {
 			recover()
 			wg.Done()
 		}()
-		count, err := dao.CountOrdersByStatus(0)
+		count, err := dao.CountOrdersByStatus(0, queryUserID)
 		if err == nil {
 			resp.Counts[0] = count
 		}
@@ -45,7 +50,7 @@ func GetOrderList(c *gin.Context) {
 			recover()
 			wg.Done()
 		}()
-		count, err := dao.CountOrdersByStatus(1)
+		count, err := dao.CountOrdersByStatus(1, queryUserID)
 		if err == nil {
 			resp.Counts[1] = count
 		}
@@ -57,7 +62,7 @@ func GetOrderList(c *gin.Context) {
 			recover()
 			wg.Done()
 		}()
-		count, err := dao.CountOrdersByStatus(2)
+		count, err := dao.CountOrdersByStatus(2, queryUserID)
 		if err == nil {
 			resp.Counts[2] = count
 		}
@@ -78,43 +83,19 @@ func GetOrderList(c *gin.Context) {
 			recover()
 			wg.Done()
 		}()
-		count, err := dao.CountOrdersByStatus(3)
+		count, err := dao.CountOrdersByStatus(3, queryUserID)
 		if err == nil {
 			resp.Counts[3] = count
 		}
 	}()
-
-	// 检查用户权限
-	var queryUserID *uint
-	authorityIds, authExists := c.Get("authorityIds")
-	isAdmin := false
-	if authExists {
-		if role, ok := authorityIds.(string); ok {
-			if strings.Contains(role, "1") {
-				isAdmin = true
-			}
-		}
-	}
-
-	// 如果不是管理员，只查询当前用户的订单
-	if !isAdmin {
-		if userID, exists := c.Get("userId"); exists {
-			if uid, ok := userID.(uint); ok {
-				queryUserID = &uid
-			}
-		}
-	}
-
+	// 等待计数完成
+	wg.Wait()
 	// 查询订单列表
 	orders, err := dao.ListOrders(q.Status, queryUserID)
 	if err != nil {
 		response.InternalError(c, err.Error())
 		return
 	}
-
-	// 等待计数完成
-	wg.Wait()
-
 	// 转换为响应格式
 	resp.Items = make([]*order.OrderResponse, len(orders))
 	for i, o := range orders {

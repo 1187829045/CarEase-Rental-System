@@ -53,7 +53,7 @@ func CreateOrder(c *gin.Context) {
 	}
 
 	// 检查车辆是否可用
-	if car.Status != 1 {
+		if car.Status != consts.CarStatusAvailable {
 		response.BadRequest(c, "车辆不可用")
 		return
 	}

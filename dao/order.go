@@ -43,9 +43,16 @@ func ListOrders(status *int8, userID *uint) ([]*model.RentalOrder, error) {
 }
 
 // CountOrdersByStatus 统计订单状态数量
-func CountOrdersByStatus(status int8) (int64, error) {
+func CountOrdersByStatus(status int8, userID *uint) (int64, error) {
 	var count int64
-	result := global.DB.Model(&model.RentalOrder{}).Where("status = ?", status).Count(&count)
+	db := global.DB.Model(&model.RentalOrder{}).Where("status = ?", status)
+	
+	// 如果指定了用户ID，只统计该用户的订单
+	if userID != nil {
+		db = db.Where("user_id = ?", *userID)
+	}
+	
+	result := db.Count(&count)
 	if result.Error != nil {
 		return 0, result.Error
 	}
@@ -55,5 +62,11 @@ func CountOrdersByStatus(status int8) (int64, error) {
 // UpdateOrderStatus 更新订单状态
 func UpdateOrderStatus(orderID uint, status int8) error {
 	result := global.DB.Model(&model.RentalOrder{}).Where("order_id = ?", orderID).Update("status", status)
+	return result.Error
+}
+
+// UpdateOrder 更新订单
+func UpdateOrder(order *model.RentalOrder) error {
+	result := global.DB.Save(order)
 	return result.Error
 }

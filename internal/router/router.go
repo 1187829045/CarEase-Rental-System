@@ -61,11 +61,13 @@ func NewHTTPRouter() *gin.Engine {
 	}
 
 	// 订单路由
-	orders := api.Group("/orders").Use(middlewares.JWTAuth(), middlewares.AdminOnly())
+	orders := api.Group("/orders").Use(middlewares.JWTAuth())
 	{
 		orders.GET("/list", orderHandler.GetOrderList)         // 订单列表
 		orders.POST("/create", orderHandler.CreateOrder)       // 创建订单
 		orders.GET("/detail/:id", orderHandler.GetOrderDetail) // 订单详情
+		orders.POST("/operate", orderHandler.OrderAction)      // 车辆操作（取车、还车、续租）
+		orders.POST("/cancel", orderHandler.CancelOrder)       // 取消订单
 	}
 
 	return engine

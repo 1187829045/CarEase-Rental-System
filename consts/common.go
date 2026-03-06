@@ -11,3 +11,25 @@ const (
 	SMSCounterKeyPrefix   = "sms:counter:"
 	SMSBlacklistKeyPrefix = "sms:blacklist:"
 )
+
+// 订单操作类型常量
+const (
+	ActionPickup = "pickup" // 取车
+	ActionReturn = "return" // 还车
+	ActionExtend = "extend" // 续租
+)
+
+// 订单状态常量
+const (
+	OrderStatusPending   = 0 // 待取车
+	OrderStatusConfirmed = 1 // 已取车-进行中
+	OrderStatusCanceled  = 2 // 已取消
+	OrderStatusCompleted = 3 // 已完成
+)
+
+// 车辆状态常量
+const (
+	CarStatusPending   = 0 // 待检测
+	CarStatusAvailable = 1 // 可用
+	CarStatusRented    = 2 // 已出租
+)
